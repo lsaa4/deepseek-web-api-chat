@@ -1,7 +1,7 @@
 # deepseek-web-api-chat
 # 🤖 DeepSeek 聊天助手
 
-一个基于 **Node.js + Express** 的全栈聊天应用，前端采用毛玻璃透明 UI，支持与 DeepSeek 最新模型（V4 Pro / Flash）进行流式对话。侧边栏可实时查看调用次数、Token 消耗和费用估算，并支持**本地上传**自定义背景图和助手头像。
+一个基于 **Node.js + Express** 的全栈聊天应用，支持与 DeepSeek 最新模型（V4 Pro / Flash）进行流式对话。侧边栏可实时查看调用次数、Token 消耗和费用估算，。
 
 ---
 
@@ -31,9 +31,9 @@
 
 ---
 
-## 🚀 快速开始
+## 快速开始
 
 ### 1. 克隆仓库
 ```bash
-git clone https://github.com/lsaa4/deepseek-chat.git
+git clone https://github.com/lsaa4/deepseek-web-api-chat.git
 cd deepseek-chat
