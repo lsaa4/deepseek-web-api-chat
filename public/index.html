@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DeepSeek 聊天助手</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-image: url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      transition: background-image 0.5s;
+    }
+
+    .app-container {
+      display: flex;
+      width: 95vw;
+      max-width: 1200px;
+      height: 92vh;
+      border-radius: 20px;
+      overflow: hidden;
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(25px);
+      -webkit-backdrop-filter: blur(25px);
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+    }
+
+    .side-panel {
+      width: 260px;
+      background: rgba(0, 0, 0, 0.2);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      border-right: 1px solid rgba(255, 255, 255, 0.2);
+      display: flex;
+      flex-direction: column;
+      padding: 20px 15px;
+      color: #fff;
+      flex-shrink: 0;
+      overflow-y: auto;
+    }
+
+    .side-panel h3 {
+      font-size: 1.2rem;
+      margin-bottom: 15px;
+      opacity: 0.9;
+      border-bottom: 1px solid rgba(255,255,255,0.2);
+      padding-bottom: 8px;
+    }
+
+    .stat-item {
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.9rem;
+    }
+
+    .stat-item label {
+      opacity: 0.7;
+    }
+
+    .stat-item span {
+      font-weight: bold;
+    }
+
+    .divider {
+      border-top: 1px solid rgba(255,255,255,0.15);
+      margin: 15px 0;
+    }
+
+    .setting-group {
+      margin-bottom: 12px;
+    }
+
+    .setting-group label {
+      display: block;
+      font-size: 0.8rem;
+      opacity: 0.7;
+      margin-bottom: 4px;
+    }
+
+    .setting-group input {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 8px;
+      background: rgba(255,255,255,0.15);
+      color: #fff;
+      outline: none;
+      font-size: 0.85rem;
+      transition: border-color 0.2s;
+    }
+
+    .setting-group input::placeholder {
+      color: rgba(255,255,255,0.5);
+    }
+
+    .setting-group input:focus {
+      border-color: #4f46e5;
+    }
+
+    .small-btn {
+      background: rgba(79, 70, 229, 0.6);
+      border: none;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      margin-top: 5px;
+      transition: background 0.2s;
+    }
+
+    .small-btn:hover {
+      background: rgba(79, 70, 229, 0.8);
+    }
+
+    .chat-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    .chat-header {
+      padding: 15px 20px;
+      color: #fff;
+      text-align: center;
+      font-size: 1.2rem;
+      font-weight: 600;
+      background: rgba(0,0,0,0.15);
+      border-bottom: 1px solid rgba(255,255,255,0.15);
+    }
+
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .message {
+      display: flex;
+      gap: 10px;
+      max-width: 80%;
+    }
+
+    .message.user {
+      align-self: flex-end;
+      flex-direction: row-reverse;
+    }
+
+    .message.assistant {
+      align-self: flex-start;
+    }
+
+    .message.user .avatar {
+      display: none;
+    }
+
+    .message .avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+
+    .message.assistant .avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .message .content {
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(5px);
+      padding: 12px 16px;
+      border-radius: 18px;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      word-break: break-word;
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.15);
+    }
+
+    .message.user .content {
+      background: rgba(79, 70, 229, 0.55);
+      border: 1px solid rgba(255,255,255,0.25);
+    }
+
+    .chat-input-area {
+      padding: 16px 20px;
+      border-top: 1px solid rgba(255,255,255,0.15);
+      display: flex;
+      gap: 10px;
+      background: rgba(0,0,0,0.1);
+    }
+
+    .chat-input-area input {
+      flex: 1;
+      padding: 12px 18px;
+      border: 1px solid rgba(255,255,255,0.25);
+      border-radius: 24px;
+      outline: none;
+      font-size: 1rem;
+      background: rgba(255,255,255,0.15);
+      color: #fff;
+      transition: border-color 0.2s;
+    }
+
+    .chat-input-area input::placeholder {
+      color: rgba(255,255,255,0.6);
+    }
+
+    .chat-input-area input:focus {
+      border-color: #4f46e5;
+    }
+
+    .chat-input-area button {
+      background: #4f46e5;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1.2rem;
+      transition: background 0.2s;
+    }
+
+    .chat-input-area button:hover {
+      background: #4338ca;
+    }
+
+    .chat-input-area button:disabled {
+      background: #7c75c9;
+      cursor: not-allowed;
+    }
+
+    .typing-cursor::after {
+      content: "▍";
+      animation: blink 1s infinite;
+    }
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+    .author-section {
+      margin-top: auto;
+      padding-top: 15px;
+      border-top: 1px solid rgba(255,255,255,0.15);
+      font-size: 0.8rem;
+      opacity: 0.8;
+    }
+
+    .author-section .author-name {
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+
+    .author-links a {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: #fff;
+      text-decoration: none;
+      margin-bottom: 5px;
+      opacity: 0.85;
+      transition: opacity 0.2s;
+    }
+
+    .author-links a:hover {
+      opacity: 1;
+    }
+
+    .author-links a svg {
+      width: 16px;
+      height: 16px;
+      fill: currentColor;
+    }
+  </style>
+</head>
+<body>
+
+<div class="app-container">
+  <div class="side-panel">
+    <h3>📊 控制面板</h3>
+
+    <div class="stat-item">
+      <label>模型</label>
+      <span id="modelName">deepseek-v4-pro</span>
+    </div>
+
+    <div class="stat-item">
+      <label>调用次数</label>
+      <span id="callCount">0</span>
+    </div>
+
+    <div class="stat-item">
+      <label>总 Token 消耗</label>
+      <span id="totalTokens">0</span>
+    </div>
+
+    <div class="stat-item">
+      <label>估计费用</label>
+      <span id="totalCost">$0.000</span>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="setting-group">
+      <label>🖼️ 背景图片</label>
+      <input
+        type="text"
+        id="bgUrlInput"
+        placeholder="输入图片链接后点应用"
+        value="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"
+      />
+      <div style="display: flex; gap: 5px;">
+        <button class="small-btn" id="applyBgBtn">应用链接</button>
+        <button class="small-btn" id="uploadBgBtn">本地上传</button>
+        <input type="file" id="bgFileInput" accept="image/*" style="display: none;" />
+      </div>
+    </div>
+
+    <div class="setting-group">
+      <label>🤖 助手头像</label>
+      <input
+        type="text"
+        id="avatarUrlInput"
+        placeholder="输入图片链接后点应用"
+      />
+      <div style="display: flex; gap: 5px;">
+        <button class="small-btn" id="applyAvatarBtn">应用链接</button>
+        <button class="small-btn" id="uploadAvatarBtn">本地上传</button>
+        <input type="file" id="avatarFileInput" accept="image/*" style="display: none;" />
+      </div>
+      <button class="small-btn" id="resetAvatarBtn" style="margin-top:5px;">恢复默认 🤖</button>
+    </div>
+
+    <!-- 作者信息 -->
+    <div class="author-section">
+      <div class="author-name">👨‍💻 作者: Minull</div>
+      <div class="author-links">
+        <a href="https://github.com/lsaa4" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.418-1.305.762-1.604-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 21.795 24 17.295 24 12c0-6.63-5.37-12-12-12z"/></svg>
+          GitHub
+        </a>
+        <a href="https://space.bilibili.com/1024614258?spm_id_from=333.1007.0.0" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24"><path d="M17.813 4.653h.854c1.51.054 2.769.578 3.773 1.574 1.004.995 1.524 2.249 1.56 3.76v7.36c-.036 1.51-.556 2.769-1.56 3.773s-2.262 1.524-3.773 1.56H5.333c-1.51-.036-2.769-.556-3.773-1.56S.036 18.858 0 17.347v-7.36c.036-1.511.556-2.765 1.56-3.76 1.004-.996 2.262-1.52 3.773-1.574h.774l-1.174-1.12a1.234 1.234 0 0 1-.373-.906c0-.356.124-.658.373-.907l.027-.027c.267-.249.573-.373.92-.373.347 0 .653.124.92.373L9.653 4.44c.071.071.134.142.187.213h4.267a.836.836 0 0 1 .16-.213l2.853-2.747c.267-.249.573-.373.92-.373.347 0 .662.151.929.4.267.249.391.551.391.907 0 .355-.124.657-.373.906zM5.333 7.24c-.746.018-1.373.276-1.88.773-.506.498-.769 1.13-.786 1.894v7.52c.017.764.28 1.395.786 1.893.507.498 1.134.756 1.88.773h13.334c.746-.017 1.373-.275 1.88-.773.506-.498.769-1.129.786-1.893v-7.52c-.017-.765-.28-1.396-.786-1.894-.507-.497-1.134-.755-1.88-.773zM8 11.107c.373 0 .684.124.933.373.25.249.383.569.4.96v1.173c-.017.391-.15.711-.4.96-.249.25-.56.374-.933.374s-.684-.125-.933-.374c-.25-.249-.383-.569-.4-.96V12.44c0-.373.129-.684.386-.933.267-.249.582-.373.947-.373zm8 0c.373 0 .684.124.933.373.25.249.383.569.4.96v1.173c-.017.391-.15.711-.4.96-.249.25-.56.374-.933.374s-.684-.125-.933-.374c-.25-.249-.383-.569-.4-.96V12.44c.017-.391.15-.711.4-.96.249-.249.56-.373.933-.373z"/></svg>
+          Bilibili
+        </a>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+    <p style="font-size:0.7rem; opacity:0.5;">费用按 DeepSeek V4 Pro 标价估算<br>输入 $0.14/1M token · 输出 $0.28/1M token</p>
+  </div>
+
+  <div class="chat-main">
+    <div class="chat-header">🤖 DeepSeek 聊天助手</div>
+    <div class="chat-messages" id="chatMessages"></div>
+    <div class="chat-input-area">
+      <input
+        type="text"
+        id="userInput"
+        placeholder="输入你的问题..."
+        autocomplete="off"
+        autofocus
+      />
+      <button id="sendButton">➤</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const chatMessages = document.getElementById('chatMessages');
+  const userInput = document.getElementById('userInput');
+  const sendButton = document.getElementById('sendButton');
+
+  const callCountEl = document.getElementById('callCount');
+  const totalTokensEl = document.getElementById('totalTokens');
+  const totalCostEl = document.getElementById('totalCost');
+  const modelNameEl = document.getElementById('modelName');
+
+  const bgUrlInput = document.getElementById('bgUrlInput');
+  const applyBgBtn = document.getElementById('applyBgBtn');
+  const uploadBgBtn = document.getElementById('uploadBgBtn');
+  const bgFileInput = document.getElementById('bgFileInput');
+
+  const avatarUrlInput = document.getElementById('avatarUrlInput');
+  const applyAvatarBtn = document.getElementById('applyAvatarBtn');
+  const uploadAvatarBtn = document.getElementById('uploadAvatarBtn');
+  const avatarFileInput = document.getElementById('avatarFileInput');
+  const resetAvatarBtn = document.getElementById('resetAvatarBtn');
+
+  let conversation = [
+    { role: "system", content: "你是一个有帮助的AI助手。" }
+  ];
+
+  let callCount = 0;
+  let totalPromptTokens = 0;
+  let totalCompletionTokens = 0;
+
+  const PRICE_PROMPT_PER_M = 0.14;
+  const PRICE_COMPLETION_PER_M = 0.28;
+
+  let assistantAvatarType = 'emoji';
+  let assistantAvatarUrl = '';
+
+  function escapeHtml(text) {
+    return text
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  function getAssistantAvatarHtml() {
+    if (assistantAvatarType === 'image' && assistantAvatarUrl) {
+      return `<img src="${escapeHtml(assistantAvatarUrl)}" alt="助手头像" />`;
+    }
+    return '🤖';
+  }
+
+  function addMessage(role, content) {
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message ${role}`;
+    
+    let avatarHtml = '';
+    if (role === 'assistant') {
+      avatarHtml = `<div class="avatar">${getAssistantAvatarHtml()}</div>`;
+    } else {
+      avatarHtml = `<div class="avatar">👤</div>`;
+    }
+
+    messageDiv.innerHTML = `
+      ${avatarHtml}
+      <div class="content">${escapeHtml(content)}</div>
+    `;
+    chatMessages.appendChild(messageDiv);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+    return messageDiv;
+  }
+
+  function updateStats() {
+    callCountEl.textContent = callCount;
+    const totalTokens = totalPromptTokens + totalCompletionTokens;
+    totalTokensEl.textContent = totalTokens;
+
+    const cost = 
+      (totalPromptTokens / 1_000_000) * PRICE_PROMPT_PER_M +
+      (totalCompletionTokens / 1_000_000) * PRICE_COMPLETION_PER_M;
+    totalCostEl.textContent = '$' + cost.toFixed(4);
+  }
+
+  function processUsage(usage) {
+    if (!usage) return;
+    if (usage.prompt_tokens) totalPromptTokens += usage.prompt_tokens;
+    if (usage.completion_tokens) totalCompletionTokens += usage.completion_tokens;
+    updateStats();
+  }
+
+  async function sendMessage() {
+    const question = userInput.value.trim();
+    if (!question) return;
+
+    userInput.disabled = true;
+    sendButton.disabled = true;
+
+    addMessage('user', question);
+    conversation.push({ role: 'user', content: question });
+    callCount++;
+    updateStats();
+
+    const assistantMsgDiv = addMessage('assistant', '');
+    const contentDiv = assistantMsgDiv.querySelector('.content');
+    let fullResponse = '';
+
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: conversation })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP 错误! 状态码: ${response.status}`);
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (!trimmed || !trimmed.startsWith('data: ')) continue;
+          
+          const jsonStr = trimmed.slice(6);
+          if (jsonStr === '[DONE]') continue;
+
+          try {
+            const parsed = JSON.parse(jsonStr);
+            
+            const delta = parsed.choices?.[0]?.delta?.content;
+            if (delta) {
+              fullResponse += delta;
+              contentDiv.textContent = fullResponse;
+              contentDiv.classList.add('typing-cursor');
+              chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+
+            if (parsed.usage) {
+              processUsage(parsed.usage);
+            }
+          } catch (e) {}
+        }
+      }
+
+      contentDiv.classList.remove('typing-cursor');
+      conversation.push({ role: 'assistant', content: fullResponse });
+
+    } catch (error) {
+      console.error('请求失败:', error);
+      contentDiv.textContent = '抱歉，请求出错了，请稍后重试。';
+      contentDiv.style.color = '#ffaaaa';
+    } finally {
+      userInput.disabled = false;
+      sendButton.disabled = false;
+      userInput.focus();
+      userInput.value = '';
+    }
+  }
+
+  applyBgBtn.addEventListener('click', () => {
+    const url = bgUrlInput.value.trim();
+    if (url) {
+      document.body.style.backgroundImage = `url('${url}')`;
+    }
+  });
+
+  uploadBgBtn.addEventListener('click', () => {
+    bgFileInput.click();
+  });
+
+  bgFileInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const dataUrl = event.target.result;
+      document.body.style.backgroundImage = `url('${dataUrl}')`;
+      bgUrlInput.value = dataUrl;
+    };
+    reader.readAsDataURL(file);
+  });
+
+  applyAvatarBtn.addEventListener('click', () => {
+    const url = avatarUrlInput.value.trim();
+    if (url) {
+      assistantAvatarType = 'image';
+      assistantAvatarUrl = url;
+    }
+    updateAllAssistantAvatars();
+  });
+
+  uploadAvatarBtn.addEventListener('click', () => {
+    avatarFileInput.click();
+  });
+
+  avatarFileInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const dataUrl = event.target.result;
+      assistantAvatarType = 'image';
+      assistantAvatarUrl = dataUrl;
+      avatarUrlInput.value = dataUrl;
+      updateAllAssistantAvatars();
+    };
+    reader.readAsDataURL(file);
+  });
+
+  resetAvatarBtn.addEventListener('click', () => {
+    assistantAvatarType = 'emoji';
+    assistantAvatarUrl = '';
+    avatarUrlInput.value = '';
+    updateAllAssistantAvatars();
+  });
+
+  function updateAllAssistantAvatars() {
+    document.querySelectorAll('.message.assistant .avatar').forEach(avatar => {
+      avatar.innerHTML = getAssistantAvatarHtml();
+    });
+  }
+
+  sendButton.addEventListener('click', sendMessage);
+  userInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') sendMessage();
+  });
+
+  updateStats();
+</script>
+</body>
+</html>
