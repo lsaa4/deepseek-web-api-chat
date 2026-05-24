@@ -11,8 +11,8 @@
 实时显示回复
 自动维护对话历史，支持长上下文
 新建/删除/切换会话，历史记录持久化存储
-支持 DeepSeek‑V3（`deepseek-chat`）与 DeepSeek‑R1（`deepseek-reasoner`）
-针对 R1 模型，可调节推理深度（`high` / `max`）
+支持 DeepSeek‑V3（`deepseek-chat`） DeepSeek‑R1（`deepseek-reasoner`）DeepSeek‑v4(flash) DeepSeek‑v4 pro
+针对 R1 V4 模型，可调节推理深度（`high` / `max`）
 
 ### 用量统计
 - 实时显示 **调用次数、Token 消耗、预估费用**（基于 DeepSeek 官方定价）
