@@ -32,25 +32,20 @@
 | 搜索 | DuckDuckGo Lite / SearXNG (自托管) |
 
 # 快速开始
-## 环境要求
-- **Node.js** >= 18
-- **npm** 或 yarn
-- 一个 DeepSeek API Key（[获取地址](https://platform.deepseek.com/api_keys)）
-
-## 1. 克隆项目
+### 1. 克隆项目
 
 ```bash
 git clone https://github.com/你的用户名/项目名.git
 cd 项目名
 ```
 
-## 2. 安装依赖
+### 2. 安装依赖
 
 ```bash
 npm install
 ```
 
-## 3.配置环境变量（可选）
+### 3.配置环境变量（可选）
 
 ```bash
 DEEPSEEK_API_KEY=sk-xxxxxxxxxxxxxxxxxxxxxxxx
@@ -59,14 +54,14 @@ PORT=3000
 你也可以完全不填 API Key，启动后在网页的“设置”面板中输入。
 ```
 
-## 4.启动服务
+### 4.启动服务
 
 ```bash
 node server.js
 ```
 或者点击run.bat
 
-## 5.开始使用
+### 5.开始使用
 浏览器打开 http://localhost:3000
 输入控制台显示的 Token 登录
 在左侧“API & 模型”中输入你的 DeepSeek API Key，点击“测试连接”
@@ -74,7 +69,7 @@ node server.js
 
 # 高级配置
 
-## 思考强度控制
+### 思考强度控制
 
 ```bash
 <select id="reasoningSelect">
@@ -85,10 +80,12 @@ node server.js
 </select>
 ```
 
-## 数据存储
+### 数据存储
 所有对话记录、设置、统计均保存在项目根目录的 data.db（SQLite）。你可以在 public/images/ 放置默认头像
 
 # 项目结构
+
+```bash
 ├── index.js               # 后端主入口（Express + SQLite）
 ├── web-search.js          # 联网搜索模块（DuckDuckGo / SearXNG）
 ├── .env.example           # 环境变量模版
@@ -98,3 +95,4 @@ node server.js
 │   ├── index.html         # 完整前端页面（内联 CSS/JS）
 │   └── images/            # 默认头像等
 └── README.md
+```
