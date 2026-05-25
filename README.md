@@ -4,7 +4,7 @@
 
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Node](https://img.shields.io/badge/node-%3E%3D18-brightgreen)
-![DeepSeek](https://img.shields.io/badge/DeepSeek-V3%2FR1-blue)
+![DeepSeek](https://img.shields.io/badge/DeepSeek-V3%2FR1%2FV4-blue)
 
 ##  主要特性
 ###  聊天功能
