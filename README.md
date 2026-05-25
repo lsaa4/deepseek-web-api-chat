@@ -98,7 +98,7 @@ node server.js
 ```
 
 ## 常见问题
-默认监听地址是127.0.0.1 只能本机访问，如需局域网访问，修改`index.html`中的app.listen(PORT,'0.0.0.0')
+默认监听地址是`127.0.0.1` 只能本机访问，如需局域网访问，修改`index.html`中的`app.listen(PORT,'0.0.0.0')`
 
 更换API地址为其他OpenAI提供兼容服务
-`修改index.html 中的/api/chat和/api/test-connection 的 hostname 及 path 即可` 
+修改`index.html` 中的`/api/chat`和`/api/test-connection` 的 `hostname` 及 `path` 即可
